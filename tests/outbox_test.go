@@ -2,6 +2,7 @@ package tests
 
 import (
 	"strconv"
+	"sync"
 	"testing"
 
 	"webtyp.com/ddl"
@@ -23,6 +24,7 @@ func (m *mockIDGenerator) NewID() string {
 }
 
 type fakeSender struct {
+	mu       sync.Mutex
 	received []string
 	answers  map[string]outbox.Result
 	wait     chan struct{} // blocks if not nil
@@ -36,7 +38,9 @@ func (s *fakeSender) Send(m *outbox.Mutation) outbox.Result {
 	if s.wait != nil {
 		<-s.wait
 	}
+	s.mu.Lock()
 	s.received = append(s.received, string(m.Payload))
+	s.mu.Unlock()
 	if res, ok := s.answers[string(m.Payload)]; ok {
 		return res
 	}
@@ -50,8 +54,9 @@ func (m memDDLCompiler) CompileDDL(s ddl.Stmt, mod model.Model) (string, []any, 
 }
 
 type memExecWrapper struct {
-    storage.Conn
+	storage.Conn
 }
+
 func (m memExecWrapper) Exec(query string, args ...any) error { return nil }
 
 func setupOutbox(t *testing.T) (*outbox.Outbox, *fakeSender, *int64, *orm.DB) {
@@ -94,7 +99,9 @@ func TestOutbox_Order(t *testing.T) {
 	if err != nil {
 		qb := db.Query(&outbox.Mutation{}).Where(outbox.Mutation_.State).Eq("pending")
 		list, _ := outbox.ReadAllMutation(qb)
-		for _, v := range list { t.Logf("Pending: %+v", v) }
+		for _, v := range list {
+			t.Logf("Pending: %+v", v)
+		}
 		t.Fatalf("Deliver error: %v", err)
 	}
 	if rep.Delivered != 3 {
@@ -213,7 +220,7 @@ func TestOutbox_RejectedDoesNotBlock(t *testing.T) {
 		t.Fatalf("Rejected error: %v", err)
 	}
 	if len(rej) != 1 || rej[0].Id != idA {
-			t.Fatalf("Expected A to be rejected, got: %+v", rej)
+		t.Fatalf("Expected A to be rejected, got: %+v", rej)
 	}
 	if rej[0].Reason != "slot taken" {
 		t.Errorf("Expected reason 'slot taken', got %q", rej[0].Reason)
@@ -245,46 +252,33 @@ func TestOutbox_Coalesce(t *testing.T) {
 		t.Errorf("Expected 1 pending mutation, got %d", pending)
 	}
 
-	// simulate user typing while sent
+	// simulate the user typing while the mutation is being sent: the channels are set BEFORE
+	// the single Deliver goroutine starts, so the test never writes what the sender reads.
 	waitChan := make(chan struct{})
 	sender.wait = waitChan
-
-	go func() {
-		ob.Deliver(sender)
-	}()
-
-	// Since tests/outbox_test.go is external, we can't inspect unexported fields.
-	// We use the `wait` chan to block Send(). That means `Deliver` is running and Send is stuck.
-	// Wait a tiny bit just to let goroutine start blocking in Send.
-	// But it's tricky without a signal. Let's send a value to a chan when Send is called!
 	sender.onSend = make(chan struct{}, 1)
+	done := make(chan struct{})
 	go func() {
-		ob.Deliver(sender)
+		defer close(done)
+		if _, err := ob.Deliver(sender); err != nil {
+			t.Errorf("Deliver: %v", err)
+		}
 	}()
-	<-sender.onSend // wait until Send is called!
+	<-sender.onSend // Send is running for the coalesced mutation (payload "2")
 
 	id3, _ := ob.Enqueue(outbox.Entry{Op: "x", Coalesce: "v1", Payload: []byte("3")})
 	if id3 == id1 {
 		t.Errorf("Expected new mutation to be created during flight")
 	}
 
-	close(waitChan) // let delivery finish
+	close(waitChan) // let the in-flight send finish; Deliver then sends "3" too
+	<-done
 
-	sender.wait = nil
-	sender.onSend = nil
-
-	// Wait for the background delivery to finish
-	// Since outbox_test is an external package, we can't inspect unexported fields easily,
-	// but we know we can just try grabbing the Deliver lock! Wait, Deliver returns error if in progress.
-	for {
-		_, err := ob.Deliver(sender)
-		if err == nil || err.Error() != "outbox: delivery already in progress" {
-			break
-		}
-	}
-
-	if len(sender.received) != 2 || sender.received[0] != "2" || sender.received[1] != "3" {
-		t.Errorf("Expected payloads [2, 3] to be delivered, got %v", sender.received)
+	sender.mu.Lock()
+	got := append([]string(nil), sender.received...)
+	sender.mu.Unlock()
+	if len(got) != 2 || got[0] != "2" || got[1] != "3" {
+		t.Errorf("Expected payloads [2, 3] to be delivered, got %v", got)
 	}
 }
 

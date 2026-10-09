@@ -1,4 +1,5 @@
 # `webtyp.com/outbox`
+<img src="docs/img/badges.svg">
 
 A durable, ordered queue of pending mutations with retry, rejection, and coalescing.
 

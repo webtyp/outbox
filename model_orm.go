@@ -8,24 +8,26 @@ import (
 )
 
 type Mutation struct {
-	Id string
-	Seq int64
-	Op string
-	Payload []byte
-	Coalesce string
-	State string
-	Attempts int64
+	Id            string
+	Seq           int64
+	Op            string
+	Payload       []byte
+	Coalesce      string
+	State         string
+	Attempts      int64
 	NextAttemptAt int64
-	DeliveredAt int64
-	Reason string
-	CreatedAt int64
+	DeliveredAt   int64
+	Reason        string
+	CreatedAt     int64
 }
 
 func (m *Mutation) ModelName() string { return "outbox_mutation" }
 
 func (m *Mutation) Schema() []model.Field { return MutationModel.Fields }
 
-func (m *Mutation) Pointers() []any { return []any{&m.Id, &m.Seq, &m.Op, &m.Payload, &m.Coalesce, &m.State, &m.Attempts, &m.NextAttemptAt, &m.DeliveredAt, &m.Reason, &m.CreatedAt} }
+func (m *Mutation) Pointers() []any {
+	return []any{&m.Id, &m.Seq, &m.Op, &m.Payload, &m.Coalesce, &m.State, &m.Attempts, &m.NextAttemptAt, &m.DeliveredAt, &m.Reason, &m.CreatedAt}
+}
 
 func (m *Mutation) IsNil() bool { return m == nil }
 
@@ -44,25 +46,47 @@ func (m *Mutation) EncodeFields(w model.FieldWriter) {
 }
 
 func (m *Mutation) DecodeFields(r model.FieldReader) {
-	if v, ok := r.String("id"); ok { m.Id = v }
-	if v, ok := r.Int("seq"); ok { m.Seq = v }
-	if v, ok := r.String("op"); ok { m.Op = v }
-	if v, ok := r.Bytes("payload"); ok { m.Payload = v }
-	if v, ok := r.String("coalesce"); ok { m.Coalesce = v }
-	if v, ok := r.String("state"); ok { m.State = v }
-	if v, ok := r.Int("attempts"); ok { m.Attempts = v }
-	if v, ok := r.Int("next_attempt_at"); ok { m.NextAttemptAt = v }
-	if v, ok := r.Int("delivered_at"); ok { m.DeliveredAt = v }
-	if v, ok := r.String("reason"); ok { m.Reason = v }
-	if v, ok := r.Int("created_at"); ok { m.CreatedAt = v }
+	if v, ok := r.String("id"); ok {
+		m.Id = v
+	}
+	if v, ok := r.Int("seq"); ok {
+		m.Seq = v
+	}
+	if v, ok := r.String("op"); ok {
+		m.Op = v
+	}
+	if v, ok := r.Bytes("payload"); ok {
+		m.Payload = v
+	}
+	if v, ok := r.String("coalesce"); ok {
+		m.Coalesce = v
+	}
+	if v, ok := r.String("state"); ok {
+		m.State = v
+	}
+	if v, ok := r.Int("attempts"); ok {
+		m.Attempts = v
+	}
+	if v, ok := r.Int("next_attempt_at"); ok {
+		m.NextAttemptAt = v
+	}
+	if v, ok := r.Int("delivered_at"); ok {
+		m.DeliveredAt = v
+	}
+	if v, ok := r.String("reason"); ok {
+		m.Reason = v
+	}
+	if v, ok := r.Int("created_at"); ok {
+		m.CreatedAt = v
+	}
 }
 
 type MutationList []*Mutation
 
-func (s *MutationList) Len() int             { return len(*s) }
-func (s *MutationList) At(i int) model.Fielder { return (*s)[i] }
-func (s *MutationList) Append() model.Fielder  { v := &Mutation{}; *s = append(*s, v); return v }
-func (s *MutationList) IsNil() bool          { return s == nil }
+func (s *MutationList) Len() int                         { return len(*s) }
+func (s *MutationList) At(i int) model.Fielder           { return (*s)[i] }
+func (s *MutationList) Append() model.Fielder            { v := &Mutation{}; *s = append(*s, v); return v }
+func (s *MutationList) IsNil() bool                      { return s == nil }
 func (s *MutationList) EncodeFields(_ model.FieldWriter) {}
 func (s *MutationList) DecodeFields(_ model.FieldReader) {}
 
@@ -71,29 +95,29 @@ func (m *Mutation) Validate(action byte) error {
 }
 
 var Mutation_ = struct {
-	Id string
-	Seq string
-	Op string
-	Payload string
-	Coalesce string
-	State string
-	Attempts string
+	Id            string
+	Seq           string
+	Op            string
+	Payload       string
+	Coalesce      string
+	State         string
+	Attempts      string
 	NextAttemptAt string
-	DeliveredAt string
-	Reason string
-	CreatedAt string
+	DeliveredAt   string
+	Reason        string
+	CreatedAt     string
 }{
-	Id: "id",
-	Seq: "seq",
-	Op: "op",
-	Payload: "payload",
-	Coalesce: "coalesce",
-	State: "state",
-	Attempts: "attempts",
+	Id:            "id",
+	Seq:           "seq",
+	Op:            "op",
+	Payload:       "payload",
+	Coalesce:      "coalesce",
+	State:         "state",
+	Attempts:      "attempts",
 	NextAttemptAt: "next_attempt_at",
-	DeliveredAt: "delivered_at",
-	Reason: "reason",
-	CreatedAt: "created_at",
+	DeliveredAt:   "delivered_at",
+	Reason:        "reason",
+	CreatedAt:     "created_at",
 }
 
 func ReadOneMutation(qb *orm.QB, model *Mutation) (*Mutation, error) {

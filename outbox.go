@@ -56,13 +56,13 @@ type Outbox struct {
 
 func New(db *orm.DB, ids model.IDGenerator, now func() int64) (*Outbox, error) {
 	if db == nil || ids == nil || now == nil {
-		return nil, boxError("db, ids and now are required")
+		return nil, errRequired
 	}
 
 	m := &Mutation{}
 	qb := db.Query(m).OrderBy(Mutation_.Seq).Desc().Limit(1)
 	_, err := ReadOneMutation(qb, m)
-	if err != nil && err != orm.ErrNotFound {
+	if err != nil && !orm.IsNotFound(err) {
 		return nil, err
 	}
 
@@ -81,7 +81,7 @@ func New(db *orm.DB, ids model.IDGenerator, now func() int64) (*Outbox, error) {
 
 func (o *Outbox) Enqueue(e Entry) (id string, err error) {
 	if e.Op == "" {
-		return "", boxError("entry op is required")
+		return "", errOpRequired
 	}
 
 	o.mu.Lock()
@@ -98,7 +98,7 @@ func (o *Outbox) Enqueue(e Entry) (id string, err error) {
 
 		_, err = ReadOneMutation(qb, existing)
 		if err != nil {
-			if err == orm.ErrNotFound {
+			if orm.IsNotFound(err) {
 				existing = nil
 			} else {
 				return "", err
@@ -142,7 +142,7 @@ func (o *Outbox) Deliver(s Sender) (Report, error) {
 	o.mu.Lock()
 	if o.inDelivery {
 		o.mu.Unlock()
-		return Report{}, boxError("delivery already in progress")
+		return Report{}, errDeliveryInProgress
 	}
 	o.inDelivery = true
 	o.mu.Unlock()
@@ -167,7 +167,7 @@ func (o *Outbox) Deliver(s Sender) (Report, error) {
 		_, err := ReadOneMutation(qb, m)
 		if err != nil {
 			o.mu.Unlock()
-			if err == orm.ErrNotFound {
+			if orm.IsNotFound(err) {
 				return rep, nil
 			}
 			return rep, err
@@ -182,7 +182,7 @@ func (o *Outbox) Deliver(s Sender) (Report, error) {
 		for _, h := range handled {
 			if h == m.Id {
 				o.mu.Unlock()
-				return rep, boxError("state update did not persist for mutation " + m.Id)
+				return rep, boxError(string(errNotPersisted) + m.Id)
 			}
 		}
 		handled = append(handled, m.Id)
@@ -213,7 +213,7 @@ func (o *Outbox) Deliver(s Sender) (Report, error) {
 			m.NextAttemptAt = o.now() + backoff(m.Attempts)
 
 			if res.Verdict != Retry {
-				m.Reason = "outbox: sender returned an unknown verdict"
+				m.Reason = reasonUnknownVerdict
 			} else {
 				m.Reason = res.Reason
 			}
@@ -236,7 +236,7 @@ func (o *Outbox) Deliver(s Sender) (Report, error) {
 }
 
 const (
-	minBackoff int64 = 1000000000 // 1s
+	minBackoff int64 = 1000000000  // 1s
 	maxBackoff int64 = 60000000000 // 60s
 )
 
@@ -318,14 +318,14 @@ func (o *Outbox) Dismiss(id string) error {
 	qb := o.db.Query(m).Where(Mutation_.Id).Eq(id).Limit(1)
 	_, err := ReadOneMutation(qb, m)
 	if err != nil {
-		if err == orm.ErrNotFound {
-			return boxError("only a rejected mutation can be dismissed")
+		if orm.IsNotFound(err) {
+			return errOnlyRejected
 		}
 		return err
 	}
 
 	if m.State != string(StateRejected) {
-		return boxError("only a rejected mutation can be dismissed")
+		return errOnlyRejected
 	}
 
 	return o.db.Delete(m, orm.Eq(Mutation_.Id, id))
