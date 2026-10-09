@@ -3,6 +3,8 @@ PLAN: "feat: outbox — durable, ordered queue of pending mutations with retry, 
 TAG: v0.1.0
 EXECUTOR: jules
 REVIEWER: none
+STATUS: running
+SESSION: 14387799303993764422
 ---
 
 > This plan is dispatched via the CodeJob workflow. See skill: agents-workflow.
