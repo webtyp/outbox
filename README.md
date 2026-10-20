@@ -15,7 +15,7 @@ Only one writer (one tab) per database at a time is supported. Ensure only a sin
 
 ## Example
 ```go
-box, _ := outbox.New(orm.New(conn), ids, time.Now)
+box, _ := outbox.New(orm.New(conn), ids, time.NowNano)
 id, _ := box.Enqueue(outbox.Entry{Op: "clinical_encounter.save_draft", Payload: b, Coalesce: visitID})
 go func() { report, err := box.Deliver(sender) /* … */ }()
 ```

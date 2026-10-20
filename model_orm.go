@@ -5,6 +5,7 @@ package outbox
 import (
 	"webtyp.com/model"
 	"webtyp.com/orm"
+	"webtyp.com/time"
 )
 
 type Mutation struct {
@@ -15,10 +16,10 @@ type Mutation struct {
 	Coalesce      string
 	State         string
 	Attempts      int64
-	NextAttemptAt int64
-	DeliveredAt   int64
+	NextAttemptAt time.Nano
+	DeliveredAt   time.Nano
 	Reason        string
-	CreatedAt     int64
+	CreatedAt     time.Nano
 }
 
 func (m *Mutation) ModelName() string { return "outbox_mutation" }
@@ -26,7 +27,7 @@ func (m *Mutation) ModelName() string { return "outbox_mutation" }
 func (m *Mutation) Schema() []model.Field { return MutationModel.Fields }
 
 func (m *Mutation) Pointers() []any {
-	return []any{&m.Id, &m.Seq, &m.Op, &m.Payload, &m.Coalesce, &m.State, &m.Attempts, &m.NextAttemptAt, &m.DeliveredAt, &m.Reason, &m.CreatedAt}
+	return []any{&m.Id, &m.Seq, &m.Op, &m.Payload, &m.Coalesce, &m.State, &m.Attempts, (*int64)(&m.NextAttemptAt), (*int64)(&m.DeliveredAt), &m.Reason, (*int64)(&m.CreatedAt)}
 }
 
 func (m *Mutation) IsNil() bool { return m == nil }
@@ -39,10 +40,10 @@ func (m *Mutation) EncodeFields(w model.FieldWriter) {
 	w.String("coalesce", m.Coalesce)
 	w.String("state", m.State)
 	w.Int("attempts", m.Attempts)
-	w.Int("next_attempt_at", m.NextAttemptAt)
-	w.Int("delivered_at", m.DeliveredAt)
+	w.Int("next_attempt_at", int64(m.NextAttemptAt))
+	w.Int("delivered_at", int64(m.DeliveredAt))
 	w.String("reason", m.Reason)
-	w.Int("created_at", m.CreatedAt)
+	w.Int("created_at", int64(m.CreatedAt))
 }
 
 func (m *Mutation) DecodeFields(r model.FieldReader) {
@@ -68,16 +69,16 @@ func (m *Mutation) DecodeFields(r model.FieldReader) {
 		m.Attempts = v
 	}
 	if v, ok := r.Int("next_attempt_at"); ok {
-		m.NextAttemptAt = v
+		m.NextAttemptAt = time.Nano(v)
 	}
 	if v, ok := r.Int("delivered_at"); ok {
-		m.DeliveredAt = v
+		m.DeliveredAt = time.Nano(v)
 	}
 	if v, ok := r.String("reason"); ok {
 		m.Reason = v
 	}
 	if v, ok := r.Int("created_at"); ok {
-		m.CreatedAt = v
+		m.CreatedAt = time.Nano(v)
 	}
 }
 

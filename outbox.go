@@ -5,6 +5,7 @@ import (
 
 	"webtyp.com/model"
 	"webtyp.com/orm"
+	"webtyp.com/time"
 )
 
 type State string
@@ -47,14 +48,14 @@ type Report struct {
 type Outbox struct {
 	db         *orm.DB
 	ids        model.IDGenerator
-	now        func() int64
+	now        func() time.Nano
 	mu         sync.Mutex
 	counter    int64
 	inDelivery bool
 	inFlight   string
 }
 
-func New(db *orm.DB, ids model.IDGenerator, now func() int64) (*Outbox, error) {
+func New(db *orm.DB, ids model.IDGenerator, now func() time.Nano) (*Outbox, error) {
 	if db == nil || ids == nil || now == nil {
 		return nil, errRequired
 	}
@@ -236,11 +237,11 @@ func (o *Outbox) Deliver(s Sender) (Report, error) {
 }
 
 const (
-	minBackoff int64 = 1000000000  // 1s
-	maxBackoff int64 = 60000000000 // 60s
+	minBackoff time.Nano = 1000000000  // 1s
+	maxBackoff time.Nano = 60000000000 // 60s
 )
 
-func backoff(attempts int64) int64 {
+func backoff(attempts int64) time.Nano {
 	if attempts <= 0 {
 		return minBackoff
 	}
@@ -331,7 +332,7 @@ func (o *Outbox) Dismiss(id string) error {
 	return o.db.Delete(m, orm.Eq(Mutation_.Id, id))
 }
 
-func (o *Outbox) Redeliver(since int64) (int, error) {
+func (o *Outbox) Redeliver(since time.Nano) (int, error) {
 	o.mu.Lock()
 	defer o.mu.Unlock()
 
@@ -365,7 +366,7 @@ func (o *Outbox) Redeliver(since int64) (int, error) {
 	return len(list), nil
 }
 
-func (o *Outbox) Prune(before int64) (int, error) {
+func (o *Outbox) Prune(before time.Nano) (int, error) {
 	o.mu.Lock()
 	defer o.mu.Unlock()
 

@@ -12,9 +12,9 @@ var MutationModel = model.Definition{
 		{Name: "coalesce", Type: model.Text()},
 		{Name: "state", Type: model.Text(), NotNull: true},
 		{Name: "attempts", Type: model.Int(), NotNull: true},
-		{Name: "next_attempt_at", Type: model.Int(), NotNull: true},
-		{Name: "delivered_at", Type: model.Int(), NotNull: true},
+		{Name: "next_attempt_at", Type: model.NanoTime(), NotNull: true},
+		{Name: "delivered_at", Type: model.NanoTime(), NotNull: true},
 		{Name: "reason", Type: model.Text()},
-		{Name: "created_at", Type: model.Int(), NotNull: true},
+		{Name: "created_at", Type: model.NanoTime(), NotNull: true},
 	},
 }
