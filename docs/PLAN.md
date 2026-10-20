@@ -2,8 +2,10 @@
 PLAN: "refactor!: typed instants of webtyp/time v0.6 in outbox — every instant field is time.Unix or time.Nano, no unit arithmetic"
 EXECUTOR: jules
 REVIEWER: none
-STATUS: running
+STATUS: review
 SESSION: 13232496029721772337
+PR: https://github.com/webtyp/outbox/pull/2
+REVIEWED_COMMIT: 7c4be333f595745ae0c2fe2636d2bbfd5f9757a7
 ---
 
 > Read AGENTS.md at the repo root before any change. This plan is complete: do not guess; if something does not fit, stop and ask in the PR.
