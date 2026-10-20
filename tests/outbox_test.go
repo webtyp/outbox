@@ -7,6 +7,7 @@ import (
 
 	"webtyp.com/ddl"
 	"webtyp.com/model"
+	"webtyp.com/time"
 	"webtyp.com/orm"
 	"webtyp.com/outbox"
 	"webtyp.com/outbox/migrate"
@@ -59,7 +60,7 @@ type memExecWrapper struct {
 
 func (m memExecWrapper) Exec(query string, args ...any) error { return nil }
 
-func setupOutbox(t *testing.T) (*outbox.Outbox, *fakeSender, *int64, *orm.DB) {
+func setupOutbox(t *testing.T) (*outbox.Outbox, *fakeSender, *time.Nano, *orm.DB) {
 	conn := mem.New()
 
 	// Create table isn't needed for mem directly since it inserts rows transparently.
@@ -72,8 +73,8 @@ func setupOutbox(t *testing.T) (*outbox.Outbox, *fakeSender, *int64, *orm.DB) {
 	db := orm.New(conn)
 	ids := &mockIDGenerator{}
 
-	var clock int64 = 1000
-	now := func() int64 { return clock }
+	var clock time.Nano = 1000
+	now := func() time.Nano { return clock }
 
 	ob, err := outbox.New(db, ids, now)
 	if err != nil {
@@ -152,7 +153,7 @@ func TestOutbox_RetryBlocksOrder(t *testing.T) {
 	}
 
 	// Advance clock less than 1s
-	*clock += 500000000 // 0.5s
+	*clock += time.Nano(500000000) // 0.5s
 	sender.received = nil
 	rep, err = ob.Deliver(sender)
 	if err != nil {
@@ -166,7 +167,7 @@ func TestOutbox_RetryBlocksOrder(t *testing.T) {
 	}
 
 	// Advance past 1s
-	*clock += 1000000000
+	*clock += time.Nano(1000000000)
 	sender.answers["B"] = outbox.Result{Verdict: outbox.Delivered}
 	rep, err = ob.Deliver(sender)
 	if err != nil {
@@ -199,7 +200,7 @@ func TestOutbox_BackoffCaps(t *testing.T) {
 
 	outbox.ReadOneMutation(qb, aMut)
 	diff := aMut.NextAttemptAt - *clock
-	if diff != 60000000000 {
+	if diff != time.Nano(60000000000) {
 		t.Errorf("Expected 60s backoff, got %d", diff)
 	}
 }
@@ -354,7 +355,7 @@ func TestOutbox_Restart(t *testing.T) {
 	db := orm.New(conn)
 	ids := &mockIDGenerator{}
 
-	now := func() int64 { return 1000 }
+	now := func() time.Nano { return 1000 }
 
 	ob1, _ := outbox.New(db, ids, now)
 	ob1.Enqueue(outbox.Entry{Op: "op", Payload: []byte("1")})

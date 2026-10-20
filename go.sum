@@ -1,3 +1,5 @@
+webtyp.com/calendar v0.1.0 h1:lI0i74Ghee+fnYDx2P6XFJQKLyJKTeQbg4eT9IK8980=
+webtyp.com/calendar v0.1.0/go.mod h1:lHsVxVDpLBAGKovlPew9d5c0YiMoNQxfUHG8OfXDhHk=
 webtyp.com/ddl v0.0.23 h1:ETjl57mN8ZHF4ro7BLMqko65ktGCwbh44kmqJhIuuPM=
 webtyp.com/ddl v0.0.23/go.mod h1:T6lNT8Pqg8Lb680WeVqrf7vR+YpkWXHOKfVG7HTDb4I=
 webtyp.com/fmt v1.0.0 h1:W0vMMGC6ezg1q2LarAEaVnNvZ26hVqzZdQQH1wcNogM=
@@ -8,3 +10,5 @@ webtyp.com/orm v0.12.9 h1:RNR88mP9HSQKO5hTGy/Kt9vuFNVZjDAkjgLeKW9h0t8=
 webtyp.com/orm v0.12.9/go.mod h1:+YBGYC5ONSfMpab4WS+RvciYM+i9JYhvul3d+7qcd9k=
 webtyp.com/storage v0.1.8 h1:vEws2tVeJsYN5b+KLjWsxuCX2l68cuqfnUCujHclhBw=
 webtyp.com/storage v0.1.8/go.mod h1:7bwMdHoQnAO5l7weZyB6LR35TLzATR5EcWrW/pXWa5c=
+webtyp.com/time v0.6.2 h1:54zst3g0xCB5GBSH/6j9P9EmvgPRs4MDCqFyDe2L/yc=
+webtyp.com/time v0.6.2/go.mod h1:dTCSLhAwMfO+4UjixTboRsXdjss59S5/8bpB9+lqc0o=
