@@ -5,7 +5,7 @@ A durable, ordered queue of pending mutations with retry, rejection, and coalesc
 
 Like the "Outbox" folder of an email client: it stores what you wrote and has not been sent yet.
 
-It runs in the browser (compiles to TinyGo WASM, over `webtyp/indexdb`) and in tests (over `webtyp.com/storage/mem`), always through `*orm.DB`. The browser environment creates the store from the model directly; backend environments can create it with `migrate.Migrate`.
+It runs in the browser (compiles to TinyGo WASM, over `webtyp/indexdb`) and in tests (over `webtyp.com/storage/mem`), always through `*orm.DB`. The browser environment creates the store from the model directly; backend environments can create it with `migrate.Migrate`, which uses `ddl.Sync` ([flow](https://github.com/webtyp/ddl/blob/main/docs/diagrams/SYNC_FLOW.md)).
 
 ## Warning
 **Deliver blocks until every due mutation was sent; never call it from a JavaScript event callback in WASM — run it in its own goroutine.**
