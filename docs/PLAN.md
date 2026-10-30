@@ -2,6 +2,8 @@
 PLAN: "fix: migrate with ddl.Sync so a new field reaches an existing table"
 EXECUTOR: jules
 REVIEWER: none
+STATUS: running
+SESSION: 6987806977135632153
 ---
 
 > Read AGENTS.md at the repo root before any change.
