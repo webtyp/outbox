@@ -6,6 +6,7 @@ import (
 
 	"webtyp.com/ddl"
 	"webtyp.com/model"
+	"webtyp.com/storage"
 
 	"webtyp.com/outbox"
 	"webtyp.com/outbox/migrate"
@@ -25,7 +26,9 @@ type tableColumns struct {
 
 var errIntrospect = errors.New("introspection failed")
 
-func (c *migrateConn) Exec(string, ...any) error { return nil }
+func (c *migrateConn) Exec(string, ...any) (storage.Result, error) {
+	return storage.Affected(0), nil
+}
 
 func (c *migrateConn) TableColumns(table string) ([]string, error) {
 	if table == c.failTable {

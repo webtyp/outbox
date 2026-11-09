@@ -67,10 +67,7 @@ func New(db *orm.DB, ids model.IDGenerator, now func() time.Nano) (*Outbox, erro
 		return nil, err
 	}
 
-	var c int64
-	if m != nil {
-		c = m.Seq
-	}
+	c := m.Seq
 
 	return &Outbox{
 		db:      db,

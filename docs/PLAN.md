@@ -2,8 +2,10 @@
 PLAN: "refactor!: Exec reports rows affected and a duplicate key (storage.Result, storage.Duplicate) — outbox"
 EXECUTOR: jules
 REVIEWER: none
-STATUS: running
+STATUS: review
 SESSION: 1102924679972379305
+PR: https://github.com/webtyp/outbox/pull/4
+REVIEWED_COMMIT: 2d0a8930d57e692fe5830b6f931e85430b22f5df
 ---
 
 > Read AGENTS.md at the repo root before any change.
