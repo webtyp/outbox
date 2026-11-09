@@ -58,7 +58,9 @@ type memExecWrapper struct {
 	storage.Conn
 }
 
-func (m memExecWrapper) Exec(query string, args ...any) error { return nil }
+func (m memExecWrapper) Exec(query string, args ...any) (storage.Result, error) {
+	return storage.Affected(0), nil
+}
 
 func setupOutbox(t *testing.T) (*outbox.Outbox, *fakeSender, *time.Nano, *orm.DB) {
 	conn := mem.New()
