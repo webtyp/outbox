@@ -2,6 +2,8 @@
 PLAN: "refactor: the retry delays are time.Duration (backoff v0.2.0)"
 EXECUTOR: jules
 REVIEWER: none
+STATUS: running
+SESSION: 10632068278413243918
 ---
 
 > Read AGENTS.md at the repo root before any change.
