@@ -417,3 +417,36 @@ func TestOutbox_NilArguments(t *testing.T) {
 		t.Errorf("Expected 'entry op is required', got %v", err)
 	}
 }
+
+func TestOutbox_RetryDelayDoublesUntilCap(t *testing.T) {
+	cases := []struct {
+		attemptsBefore int64
+		want           time.Nano
+	}{
+		{0, 1000000000},   // first failure: 1 s
+		{1, 2000000000},   // 2 s
+		{2, 4000000000},   // 4 s
+		{5, 32000000000},  // 32 s
+		{6, 60000000000},  // 7th failure: capped at 60 s
+		{50, 60000000000}, // far beyond the cap
+	}
+	for _, c := range cases {
+		ob, sender, clock, db := setupOutbox(t)
+		ob.Enqueue(outbox.Entry{Op: "op", Payload: []byte("A")})
+		sender.answers["A"] = outbox.Result{Verdict: outbox.Retry}
+
+		mutation := &outbox.Mutation{}
+		query := db.Query(mutation).Where(outbox.Mutation_.Id).Eq("id1")
+		outbox.ReadOneMutation(query, mutation)
+		mutation.Attempts = c.attemptsBefore
+		mutation.NextAttemptAt = *clock
+		db.UpdateFields(mutation, []string{outbox.Mutation_.Attempts, outbox.Mutation_.NextAttemptAt}, orm.Eq(outbox.Mutation_.Id, mutation.Id))
+
+		ob.Deliver(sender)
+
+		outbox.ReadOneMutation(query, mutation)
+		if got := mutation.NextAttemptAt - *clock; got != c.want {
+			t.Errorf("attempts before %d: next attempt in %d, want %d", c.attemptsBefore, got, c.want)
+		}
+	}
+}

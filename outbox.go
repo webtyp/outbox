@@ -3,6 +3,7 @@ package outbox
 import (
 	"sync"
 
+	"webtyp.com/backoff"
 	"webtyp.com/model"
 	"webtyp.com/orm"
 	"webtyp.com/time"
@@ -49,6 +50,7 @@ type Outbox struct {
 	db         *orm.DB
 	ids        model.IDGenerator
 	now        func() time.Nano
+	retry      backoff.Policy
 	mu         sync.Mutex
 	counter    int64
 	inDelivery bool
@@ -58,6 +60,11 @@ type Outbox struct {
 func New(db *orm.DB, ids model.IDGenerator, now func() time.Nano) (*Outbox, error) {
 	if db == nil || ids == nil || now == nil {
 		return nil, errRequired
+	}
+
+	retry, retryErr := backoff.New(firstRetryDelay, longestRetryDelay)
+	if retryErr != nil {
+		return nil, retryErr
 	}
 
 	m := &Mutation{}
@@ -73,6 +80,7 @@ func New(db *orm.DB, ids model.IDGenerator, now func() time.Nano) (*Outbox, erro
 		db:      db,
 		ids:     ids,
 		now:     now,
+		retry:   retry,
 		counter: c,
 	}, nil
 }
@@ -208,7 +216,12 @@ func (o *Outbox) Deliver(s Sender) (Report, error) {
 			fallthrough
 		default:
 			m.Attempts++
-			m.NextAttemptAt = o.now() + backoff(m.Attempts)
+			delay, delayErr := o.retry.DelayAfter(m.Attempts)
+			if delayErr != nil {
+				o.mu.Unlock()
+				return rep, delayErr
+			}
+			m.NextAttemptAt = o.now() + delay
 
 			if res.Verdict != Retry {
 				m.Reason = reasonUnknownVerdict
@@ -234,25 +247,9 @@ func (o *Outbox) Deliver(s Sender) (Report, error) {
 }
 
 const (
-	minBackoff time.Nano = 1000000000  // 1s
-	maxBackoff time.Nano = 60000000000 // 60s
+	firstRetryDelay   time.Nano = 1000000000  // 1 s after the first failure
+	longestRetryDelay time.Nano = 60000000000 // 60 s: the delay never grows past this
 )
-
-func backoff(attempts int64) time.Nano {
-	if attempts <= 0 {
-		return minBackoff
-	}
-	shift := attempts - 1
-	if shift >= 62 {
-		return maxBackoff
-	}
-
-	val := minBackoff * (1 << shift)
-	if val > maxBackoff || val <= 0 {
-		return maxBackoff
-	}
-	return val
-}
 
 func (o *Outbox) RetryNow() error {
 	o.mu.Lock()

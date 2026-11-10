@@ -3,6 +3,7 @@ module webtyp.com/outbox
 go 1.26.8
 
 require (
+	webtyp.com/backoff v0.1.0
 	webtyp.com/ddl v0.0.49
 	webtyp.com/model v0.2.18
 	webtyp.com/orm v0.12.30
