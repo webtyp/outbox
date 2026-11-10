@@ -3,6 +3,8 @@ PLAN: "refactor: outbox takes its retry delay from webtyp.com/backoff and delete
 TAG: v0.1.28
 EXECUTOR: jules
 REVIEWER: none
+STATUS: running
+SESSION: 1784567657326114514
 ---
 
 > Read AGENTS.md at the repo root before any change.
