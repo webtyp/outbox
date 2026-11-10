@@ -2,8 +2,10 @@
 PLAN: "refactor: the retry delays are time.Duration (backoff v0.2.0)"
 EXECUTOR: jules
 REVIEWER: none
-STATUS: running
+STATUS: review
 SESSION: 10632068278413243918
+PR: https://github.com/webtyp/outbox/pull/6
+REVIEWED_COMMIT: 5ab5147ba5a36fded024da082bad82b994ff3fbf
 ---
 
 > Read AGENTS.md at the repo root before any change.
