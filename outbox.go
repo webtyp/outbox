@@ -221,7 +221,7 @@ func (o *Outbox) Deliver(s Sender) (Report, error) {
 				o.mu.Unlock()
 				return rep, delayErr
 			}
-			m.NextAttemptAt = o.now() + delay
+			m.NextAttemptAt = o.now().Add(delay)
 
 			if res.Verdict != Retry {
 				m.Reason = reasonUnknownVerdict
@@ -247,8 +247,8 @@ func (o *Outbox) Deliver(s Sender) (Report, error) {
 }
 
 const (
-	firstRetryDelay   time.Nano = 1000000000  // 1 s after the first failure
-	longestRetryDelay time.Nano = 60000000000 // 60 s: the delay never grows past this
+	firstRetryDelay   time.Duration = time.Second      // 1 s after the first failure
+	longestRetryDelay time.Duration = 60 * time.Second // 60 s: the delay never grows past this
 )
 
 func (o *Outbox) RetryNow() error {

@@ -1,5 +1,5 @@
-webtyp.com/backoff v0.1.0 h1:KFMNh2ApE5Vi/PgwRHWcQ81SsDYjrGTfVQnGEZaOS+I=
-webtyp.com/backoff v0.1.0/go.mod h1:YTkBXe05fve0/owWcBmraJHvxca27BjvnAbe5a7/Ats=
+webtyp.com/backoff v0.2.0 h1:XEiTU+GmSDODr0hIy/TdSGo3W7hZACy0mZNGMHisFhs=
+webtyp.com/backoff v0.2.0/go.mod h1:Uq1M0sRaizOBbQxcFpWfb2+3P5ClnlkzlVUoHE6Mw1E=
 webtyp.com/calendar v0.1.0 h1:lI0i74Ghee+fnYDx2P6XFJQKLyJKTeQbg4eT9IK8980=
 webtyp.com/calendar v0.1.0/go.mod h1:lHsVxVDpLBAGKovlPew9d5c0YiMoNQxfUHG8OfXDhHk=
 webtyp.com/crud v0.0.11 h1:AcYXs6/6ZpQayRwJSQTR/9pghqgsa/C2MUx0L1eVTws=
@@ -24,5 +24,5 @@ webtyp.com/router v0.4.20 h1:nk/RbLdQ1VA0xo6YOGpKMpI54B3FL/bW8SkPdS9yYe8=
 webtyp.com/router v0.4.20/go.mod h1:biJ3lkRCzluN/1uEWWWDnWFQD98aaaJMRwJ44yVr7pQ=
 webtyp.com/storage v0.2.1 h1:t4cv96INbezCh6LuYh5wL6zHyciyMzudD3GExjvX9Xk=
 webtyp.com/storage v0.2.1/go.mod h1:yJ/FUhWqroe+5J9JFlZdAwCOa99SXJ1wS/H/PZw64tU=
-webtyp.com/time v0.6.4 h1:T2c0Dbv3YsgaqX1hFLoZtJuOdMq7UUanqln+hVnQzOk=
-webtyp.com/time v0.6.4/go.mod h1:dTCSLhAwMfO+4UjixTboRsXdjss59S5/8bpB9+lqc0o=
+webtyp.com/time v0.6.5 h1:ABSKDj/3gX0su14A3+oeWRCy47yrSzbPoc5oAryxkzo=
+webtyp.com/time v0.6.5/go.mod h1:dTCSLhAwMfO+4UjixTboRsXdjss59S5/8bpB9+lqc0o=
