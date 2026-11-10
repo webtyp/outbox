@@ -11,3 +11,6 @@
 
 ## Metaphor
 The system behaves just like an email client's "Outbox". Changes are staged and ordered in the Outbox. They wait until the client regains connectivity to send them to the server sequentially, reporting either delivery success, rejection (for good), or retry logic on transient errors.
+
+## Retry delay
+When the server answers `Retry`, the mutation waits 1 s after the first failure and doubles after each further failure up to 60 s. The calculation lives in `webtyp.com/backoff` (one library for every retry delay in the framework). See https://github.com/webtyp/backoff/blob/main/README.md.
