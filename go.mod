@@ -5,7 +5,7 @@ go 1.26.8
 require (
 	webtyp.com/backoff v0.2.0
 	webtyp.com/ddl v0.0.49
-	webtyp.com/model v0.2.20
+	webtyp.com/model v0.2.21
 	webtyp.com/orm v0.12.30
 	webtyp.com/storage v0.2.1
 	webtyp.com/time v0.6.5
